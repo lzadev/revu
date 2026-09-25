@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import crypto from 'node:crypto';
 import { makeRepo, runRevu, startLLM, userConfig } from './helpers.js';
 
@@ -350,7 +351,7 @@ test('SEC-31 detection engine health: gitleaks rules all compile, and revu\'s ow
   const st = ruleStats();
   assert.ok(st.compiled >= 220, `only ${st.compiled} rules compiled`);
   assert.deepEqual(st.failed, []);
-  const dir = new URL('../src/', import.meta.url).pathname;
+  const dir = fileURLToPath(new URL('../src/', import.meta.url));
   for (const f of fs.readdirSync(dir).filter(x => x.endsWith('.js'))) assert.equal(scanText(fs.readFileSync(path.join(dir, f), 'utf8'), { path: 'src/' + f }).length, 0, `false positive in ${f}`);
 });
 
@@ -445,7 +446,7 @@ test('SEC-39 the git hook survives a Node upgrade: it falls back to the node on 
 });
 
 test('SEC-40 with no node at all the hook says so loudly and lets the commit continue (nothing is sent anywhere)', async () => {
-  if (fs.existsSync('/usr/bin/node') || fs.existsSync('/bin/node')) return; // this machine has a system node: cannot simulate
+  if (process.platform === 'win32' || fs.existsSync('/usr/bin/node') || fs.existsSync('/bin/node')) return; // unix-only simulation; a machine with a system node cannot be simulated
   const { installHook } = await import(src('init.js'));
   const r = makeRepo({ staged: { 'a.js': 'export const a = 1;\n' } });
   const hook = installHook(r.dir).file;
@@ -489,7 +490,7 @@ test('I18N-03 the review prompt asks for English (no language switch is left)', 
 });
 
 test('I18N-04 no Spanish anywhere: source, templates, scripts, docs and package metadata', () => {
-  const root = new URL('../', import.meta.url).pathname;
+  const root = fileURLToPath(new URL('../', import.meta.url));
   const docs = fs.readdirSync(path.join(root, 'docs')).filter(f => f.endsWith('.md')).map(f => 'docs/' + f);
   const files = [...fs.readdirSync(path.join(root, 'src')).filter(f => f.endsWith('.js')).map(f => 'src/' + f), 'bin/revu.js', 'templates/revu.yaml', 'scripts/import-gitleaks.py', 'package.json',
     'README.md', 'SECURITY.md', 'THIRD_PARTY.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'CHANGELOG.md', ...docs];
@@ -638,17 +639,21 @@ test('SEC-50 revu reads the model, tokens and cost that the Claude CLI reports, 
   const { complete } = await import(src('providers.js'));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'fake-claude-'));
   const ok = { type: 'result', is_error: false, result: '{"findings":[]}', total_cost_usd: 0.0123, modelUsage: { 'claude-sonnet-5': { inputTokens: 3, cacheReadInputTokens: 400, cacheCreationInputTokens: 100, outputTokens: 50, costBasis: 'list' } } };
-  fs.writeFileSync(path.join(dir, 'ok.sh'), `#!/bin/sh\ncat >/dev/null\nprintf '%s' '${JSON.stringify(ok)}'\n`, { mode: 0o755 });
-  fs.writeFileSync(path.join(dir, 'err.sh'), `#!/bin/sh\ncat >/dev/null\nprintf '%s' '${JSON.stringify({ type: 'result', is_error: true, result: 'Not logged in' })}'\n`, { mode: 0o755 });
-  const cfg = { provider: { type: 'command', command: path.join(dir, 'ok.sh'), timeout_s: 10 } };
+  const fake = (name, payload) => { // a tiny CLI: reads stdin, prints a JSON envelope (a node script runs the same on every OS)
+    const file = path.join(dir, name);
+    fs.writeFileSync(file, `process.stdin.resume(); process.stdin.on('end', () => process.stdout.write(${JSON.stringify(JSON.stringify(payload))}));`);
+    return `"${process.execPath}" "${file}"`;
+  };
+  const okCmd = fake('ok.js', ok), errCmd = fake('err.js', { type: 'result', is_error: true, result: 'Not logged in' });
+  const cfg = { provider: { type: 'command', command: okCmd, timeout_s: 10 } };
   const text = await complete(cfg, { system: 's', user: 'u' });
   assert.equal(text, '{"findings":[]}');
   assert.deepEqual(cfg._llmMeta.models, ['claude-sonnet-5']);
   assert.equal(cfg._llmMeta.input, 503); assert.equal(cfg._llmMeta.output, 50);
   assert.equal(cfg._llmMeta.cost, 0.0123); assert.equal(cfg._llmMeta.calls, 1);
-  await assert.rejects(complete({ provider: { type: 'command', command: path.join(dir, 'err.sh'), timeout_s: 10 } }, { system: 's', user: 'u' }), /Not logged in/);
+  await assert.rejects(complete({ provider: { type: 'command', command: errCmd, timeout_s: 10 } }, { system: 's', user: 'u' }), /Not logged in/);
   // plain-text commands keep working
-  assert.match(await complete({ provider: { type: 'command', command: 'cat', timeout_s: 10 } }, { system: 'SYS', user: 'USR' }), /SYS/);
+  assert.match(await complete({ provider: { type: 'command', command: `"${process.execPath}" -e "process.stdin.pipe(process.stdout)"`, timeout_s: 10 } }, { system: 'SYS', user: 'USR' }), /SYS/);
 });
 
 test('SEC-51 the review summary shows which model answered, its tokens and cost', async () => {

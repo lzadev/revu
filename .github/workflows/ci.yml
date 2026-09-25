@@ -39,7 +39,8 @@ jobs:
         run: |
           # grep exits 1 when nothing matches (no failing tests): that must not fail this step
           { grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt || true; } | while read -r l; do echo "::notice title=tests::$l"; done
-          { grep -E '^not ok' test-output.txt | head -20 || true; } | while read -r l; do echo "::error title=failing test::$l"; done
+          # one annotation per failing test, with the first lines of its error (newlines encoded as %0A)
+          awk '/^not ok/ {if (blk!="") print blk; blk=$0; n=0; next} blk!="" && /^(ok |# )/ {print blk; blk=""; next} blk!="" && n<8 && /(error|expected|actual|code:|message|Error|at )/ {gsub(/^[ \t]+/,""); blk=blk "%0A" substr($0,1,220); n++} END {if (blk!="") print blk}' test-output.txt | head -20 | while read -r l; do echo "::error title=failing test::$l"; done
 
   windows:
     name: Windows (experimental)
@@ -62,7 +63,8 @@ jobs:
         run: |
           # grep exits 1 when nothing matches (no failing tests): that must not fail this step
           { grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt || true; } | while read -r l; do echo "::notice title=tests::$l"; done
-          { grep -E '^not ok' test-output.txt | head -20 || true; } | while read -r l; do echo "::error title=failing test::$l"; done
+          # one annotation per failing test, with the first lines of its error (newlines encoded as %0A)
+          awk '/^not ok/ {if (blk!="") print blk; blk=$0; n=0; next} blk!="" && /^(ok |# )/ {print blk; blk=""; next} blk!="" && n<8 && /(error|expected|actual|code:|message|Error|at )/ {gsub(/^[ \t]+/,""); blk=blk "%0A" substr($0,1,220); n++} END {if (blk!="") print blk}' test-output.txt | head -20 | while read -r l; do echo "::error title=failing test::$l"; done
 
   audit:
     name: Dependency audit
