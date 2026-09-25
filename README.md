@@ -216,17 +216,21 @@ revu is **beta** (`0.x`): the design is stable, the details may change.
 | | Status |
 |---|---|
 | Tests | 60+ automated tests, including a regression test for every security flaw that was fixed |
-| macOS | Developed and tested here |
-| Linux | Runs in CI on every push |
-| Windows | Experimental: not verified by the author; the hook relies on the `sh` that ships with Git for Windows |
+| macOS | Developed and tested here; runs in CI (Node 20 and 22) |
+| Linux | Runs in CI on every push (Node 20 and 22) |
+| Windows | Experimental: runs in CI as a non-blocking job and most tests pass; not verified by hand ([#3](https://github.com/lzadev/revu/issues/3)) |
 | VS Code commit button, terminal, CI-style pipes | Verified |
-| Cursor, Copilot agent, GitHub Desktop | Not tested |
-| `anthropic` API provider, `codex` and `gemini` presets | Written against the documentation, not tested against the real services |
-| Local models | The native Ollama provider works; only one model has been benchmarked (see the guide) |
+| Cursor, Copilot agent, GitHub Desktop | Not tested ([#4](https://github.com/lzadev/revu/issues/4)) |
+| `anthropic` API provider | Written against the documentation, not tested against the real API ([#5](https://github.com/lzadev/revu/issues/5)) |
+| `codex` and `gemini` presets | Written against the documentation, never run ([#6](https://github.com/lzadev/revu/issues/6)) |
+| Local models | The native Ollama provider works; only one model has been benchmarked ([#7](https://github.com/lzadev/revu/issues/7)) |
 
-**Ideas for the roadmap:** a "local only" hook mode (free checks on every commit, the LLM review once per branch), a spending
-cap per review, generic secret detection for more languages, and publishing to npm. Have another idea?
-[Open an issue](https://github.com/lzadev/revu/issues/new/choose).
+**On the roadmap:**
+a "local only" hook mode with free checks on every commit and the LLM review once per branch
+([#8](https://github.com/lzadev/revu/issues/8)), a spending cap per review ([#9](https://github.com/lzadev/revu/issues/9)),
+generic secret detection for more languages ([#10](https://github.com/lzadev/revu/issues/10)) and publishing to npm
+([#11](https://github.com/lzadev/revu/issues/11)). Have another idea? [Open an issue](https://github.com/lzadev/revu/issues/new/choose).
+Many of these are marked `help wanted`.
 
 ## Documentation
 
