@@ -1,0 +1,4 @@
+* text=auto eol=lf
+src/data/gitleaks-rules.json linguist-generated=true
+scripts/gitleaks.upstream.toml linguist-vendored=true
+*.svg -diff

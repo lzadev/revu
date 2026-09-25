@@ -1,0 +1,43 @@
+# .revu.yaml — TEAM rules for the code review. Commit this file.
+# Which LLM each person uses does NOT go here: it goes in .revu.local.yaml (not committed).
+#
+# Everything is optional. revu already reads these files on its own, when they exist:
+#   AGENTS.md, CLAUDE.md, .cursorrules, .github/copilot-instructions.md, CONTRIBUTING.md and .revu/rules/*.md
+# (plus AGENTS.md / CLAUDE.md inside sub-folders, which only apply to files in that folder).
+# See what it is reading with:  revu rules
+
+profile: __PROFILE__        # chill = only what matters · assertive = thorough (includes minor things)
+
+block_on: [critical, major] # severities that block the commit: critical | major | minor | nit
+fail_open: true             # if the LLM cannot be reached, let the commit through? (secret checks always block)
+
+# Team rules in plain language. Be specific: it means fewer false positives.
+# Write MUST: in front of anything that should BLOCK the commit.
+guidelines: |
+  - MUST: never commit secrets, tokens or private URLs; read them from environment variables.
+  - MUST: every promise / async call handles its error (try/catch or .catch); no swallowed errors.
+  - MUST: no `console.log` or `debugger` outside tests.
+  - Descriptive names, no cryptic abbreviations. Functions longer than ~50 lines: suggest splitting them.
+  - Any change to business logic should come with a test.
+
+# Rules that only apply to some paths (glob). Used only when the diff touches those files.
+# Alternative: one file per topic in .revu/rules/  (see the README).
+path_instructions:
+  - path: "src/**/*.{ts,tsx}"
+    instructions: |
+      - No `any`; type props and the return type of exported functions.
+      - React components in PascalCase, hooks prefixed with `use`.
+      - Watch for missing dependencies in useEffect / useMemo / useCallback.
+
+# Files that are never reviewed (added to the built-in ignores: lockfiles, dist, images…)
+# ignore_paths: ["src/generated/**"]
+
+# Files that must NEVER be sent to an LLM (also read: .revuignore, .cursorignore, .aiexclude, .copilotignore)
+# never_send: ["customer-data/**"]
+
+# What happens when a secret is found: withhold (default: the file is not sent to any LLM) | redact | off
+# secret_policy: withhold
+
+# Change the automatic list of rule files (by default the ones listed at the top are read):
+# guidelines_files: [docs/STYLE.md]     # replaces the list
+# guidelines_files: []                  # turns auto-discovery off

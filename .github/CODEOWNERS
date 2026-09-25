@@ -1,0 +1,9 @@
+# Security-sensitive parts need the maintainer's review.
+*                     @lzadev
+/src/providers.js     @lzadev
+/src/secrets.js       @lzadev
+/src/guard.js         @lzadev
+/src/trust.js         @lzadev
+/src/apply.js         @lzadev
+/SECURITY.md          @lzadev
+/test/security.test.js @lzadev

@@ -1,0 +1,42 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please **remove secrets and private code** from anything you paste.
+        For security problems use the private advisory link instead of this form.
+  - type: textarea
+    id: what
+    attributes: { label: What happened?, description: What did you expect instead? }
+    validations: { required: true }
+  - type: textarea
+    id: steps
+    attributes: { label: Steps to reproduce, description: "Commands, a minimal diff or repository if you can." }
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes: { label: revu version, description: Output of `revu --version` }
+    validations: { required: true }
+  - type: input
+    id: node
+    attributes: { label: Node.js version, description: Output of `node -v` }
+    validations: { required: true }
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [macOS, Linux, Windows, Other]
+    validations: { required: true }
+  - type: dropdown
+    id: provider
+    attributes:
+      label: LLM provider
+      options: [claude (CLI), ollama, lmstudio, anthropic API, openai / compatible, command, other, not related to the LLM]
+    validations: { required: true }
+  - type: textarea
+    id: doctor
+    attributes:
+      label: "`revu doctor` output"
+      render: text

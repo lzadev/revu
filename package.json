@@ -1,0 +1,54 @@
+{
+  "name": "revu",
+  "version": "0.3.0",
+  "description": "Pre-commit AI code review with your own rules and any LLM (local or subscription)",
+  "keywords": [
+    "code-review",
+    "pre-commit",
+    "git-hook",
+    "ai",
+    "llm",
+    "ollama",
+    "claude",
+    "secrets",
+    "gitleaks",
+    "security",
+    "cli"
+  ],
+  "author": "lzadev (https://github.com/lzadev)",
+  "license": "MIT",
+  "homepage": "https://github.com/lzadev/revu#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lzadev/revu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lzadev/revu/issues"
+  },
+  "type": "module",
+  "bin": {
+    "revu": "bin/revu.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "README.md",
+    "SECURITY.md",
+    "THIRD_PARTY.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "prepublishOnly": "npm test"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "picocolors": "^1.1.1",
+    "yaml": "^2.9.1"
+  }
+}

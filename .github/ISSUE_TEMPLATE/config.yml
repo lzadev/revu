@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability (private)
+    url: https://github.com/lzadev/revu/security/advisories/new
+    about: Please do not open a public issue for security problems.
+  - name: Read the documentation
+    url: https://github.com/lzadev/revu/blob/main/docs/README.md
+    about: Guides for configuration, providers, agents and troubleshooting.
