@@ -24,6 +24,14 @@ First public release.
   provider call, sensitive-file and exclusion lists (`.revuignore`, `.cursorignore`, `.aiexclude`, `.copilotignore`).
 - Adaptive batching for local models' context windows and truncation detection for Ollama.
 
+### Fixed
+
+- Colour codes are no longer written when the output is not a terminal (they appeared on pipes on Windows or when `CI` was
+  set), which polluted what agents and the VS Code Git panel read. `FORCE_COLOR` still works.
+- The trust store compares repository paths in their canonical form, so `revu trust` also works on Windows where git and
+  Node can report the same path differently.
+- The whole test suite now passes on Windows in CI (non-blocking job; not yet verified by hand).
+
 ### Security
 
 - 16 flaws found in a security review and fixed, each with a regression test (see [SECURITY.md](SECURITY.md)): repository

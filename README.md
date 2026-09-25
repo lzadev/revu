@@ -218,7 +218,7 @@ revu is **beta** (`0.x`): the design is stable, the details may change.
 | Tests | 60+ automated tests, including a regression test for every security flaw that was fixed |
 | macOS | Developed and tested here; runs in CI (Node 20 and 22) |
 | Linux | Runs in CI on every push (Node 20 and 22) |
-| Windows | Experimental: runs in CI as a non-blocking job and most tests pass; not verified by hand ([#3](https://github.com/lzadev/revu/issues/3)) |
+| Windows | Experimental: the whole test suite (64 tests) passes on Windows in CI as a non-blocking job; not yet verified by hand ([#3](https://github.com/lzadev/revu/issues/3)) |
 | VS Code commit button, terminal, CI-style pipes | Verified |
 | Cursor, Copilot agent, GitHub Desktop | Not tested ([#4](https://github.com/lzadev/revu/issues/4)) |
 | `anthropic` API provider | Written against the documentation, not tested against the real API ([#5](https://github.com/lzadev/revu/issues/5)) |

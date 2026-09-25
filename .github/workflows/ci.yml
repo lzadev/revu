@@ -8,10 +8,10 @@ on:
 permissions:
   contents: read
 
-# A new push cancels the runs it makes obsolete
+# A new push to a pull request cancels the runs it makes obsolete; runs on main are never cancelled
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
