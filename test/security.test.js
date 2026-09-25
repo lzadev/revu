@@ -216,8 +216,8 @@ test('SEC-20 once a person approves a repo provider (revu trust), it works', asy
   const r = makeRepo({ staged: { 'a.js': 'const a = 1;\n' } });
   const provider = { type: 'openai', base_url: llm.url, model: 'm' };
   fs.writeFileSync(path.join(r.dir, '.revu.yaml'), `provider:\n  type: openai\n  base_url: ${llm.url}\n  model: m\n`);
-  const prev = process.env.HOME; process.env.HOME = r.home;   // trust store lives under HOME
-  try { trust(r.dir, provider); } finally { process.env.HOME = prev; }
+  const prev = [process.env.HOME, process.env.USERPROFILE]; process.env.HOME = process.env.USERPROFILE = r.home;   // trust store lives under the home directory
+  try { trust(r.dir, provider); } finally { [process.env.HOME, process.env.USERPROFILE] = prev; }
   await runRevu(r);
   llm.close();
   assert.equal(llm.seen.length, 1);

@@ -37,8 +37,9 @@ jobs:
         if: always()
         shell: bash
         run: |
-          grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt | while read -r l; do echo "::notice title=tests::$l"; done
-          grep -E '^not ok' test-output.txt | head -20 | while read -r l; do echo "::error title=failing test::$l"; done
+          # grep exits 1 when nothing matches (no failing tests): that must not fail this step
+          { grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt || true; } | while read -r l; do echo "::notice title=tests::$l"; done
+          { grep -E '^not ok' test-output.txt | head -20 || true; } | while read -r l; do echo "::error title=failing test::$l"; done
 
   windows:
     name: Windows (experimental)
@@ -59,8 +60,9 @@ jobs:
         if: always()
         shell: bash
         run: |
-          grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt | while read -r l; do echo "::notice title=tests::$l"; done
-          grep -E '^not ok' test-output.txt | head -20 | while read -r l; do echo "::error title=failing test::$l"; done
+          # grep exits 1 when nothing matches (no failing tests): that must not fail this step
+          { grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt || true; } | while read -r l; do echo "::notice title=tests::$l"; done
+          { grep -E '^not ok' test-output.txt | head -20 || true; } | while read -r l; do echo "::error title=failing test::$l"; done
 
   audit:
     name: Dependency audit

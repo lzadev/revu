@@ -28,7 +28,7 @@ export function runRevu({ dir, home }, args = [], env = {}) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, [BIN, ...args], {
       cwd: dir, stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, HOME: home, CLAUDECODE: '', CI: '', REVU_SKIP: '', REVU_PLAIN: '', LANG: 'en_US.UTF-8', ...env },
+      env: { ...process.env, HOME: home, USERPROFILE: home, CLAUDECODE: '', CI: '', REVU_SKIP: '', REVU_PLAIN: '', LANG: 'en_US.UTF-8', ...env },
     });
     let out = '';
     child.stdout.on('data', d => (out += d)); child.stderr.on('data', d => (out += d));
