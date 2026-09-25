@@ -706,3 +706,13 @@ test('SEC-53 `revu bench` reports an unreachable provider instead of a fake scor
   assert.match(out, /could not run|error/i);
   assert.doesNotMatch(out, /of 7 planted bugs/);
 });
+
+// ───────────────────────── 18. Output is plain when it is not a terminal ─────────────────────────
+test('SEC-54 piped output carries no colour codes even when CI is set (agents and the VS Code Git panel read it raw)', async () => {
+  const r = makeRepo({ staged: { 'a.js': 'export const a = 1;\n' } });
+  const { out } = await runRevu(r, ['--help'], { CI: 'true' });
+  assert.match(out, /How it works/);
+  assert.doesNotMatch(out, /\u001b\[/, 'ANSI colour codes were written to a pipe');
+  const forced = await runRevu(r, ['--help'], { CI: 'true', FORCE_COLOR: '1' });
+  assert.match(forced.out, /\u001b\[/, 'FORCE_COLOR must still be honoured');
+});

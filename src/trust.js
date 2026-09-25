@@ -8,7 +8,8 @@ import path from 'node:path';
 const storeFile = () => path.join(os.homedir(), '.config', 'revu', 'trusted.json');
 const canon = v => JSON.stringify(v, (_, x) => (x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1))) : x));
 export const providerFingerprint = p => crypto.createHash('sha256').update(canon(p)).digest('hex').slice(0, 32);
-const realRoot = root => { try { return fs.realpathSync(root); } catch { return root; } };
+// .native resolves Windows short (8.3) names and letter case, so git's path and Node's path compare equal
+const realRoot = root => { try { return fs.realpathSync.native(root); } catch { try { return fs.realpathSync(root); } catch { return root; } } };
 const load = () => { try { return JSON.parse(fs.readFileSync(storeFile(), 'utf8')); } catch { return {}; } };
 
 export const isTrusted = (root, provider) => (load()[realRoot(root)] || []).includes(providerFingerprint(provider));
