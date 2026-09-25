@@ -8,10 +8,16 @@ on:
 permissions:
   contents: read
 
+# A new push cancels the runs it makes obsolete
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -24,11 +30,20 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npm test
+      - name: Run tests
+        shell: bash
+        run: npm test 2>&1 | tee test-output.txt
+      - name: Summarize tests
+        if: always()
+        shell: bash
+        run: |
+          grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt | while read -r l; do echo "::notice title=tests::$l"; done
+          grep -E '^not ok' test-output.txt | head -20 | while read -r l; do echo "::error title=failing test::$l"; done
 
   windows:
     name: Windows (experimental)
     runs-on: windows-latest
+    timeout-minutes: 20
     continue-on-error: true   # Windows is not verified yet: this job collects signal without failing the build
     steps:
       - uses: actions/checkout@v4
@@ -37,11 +52,20 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
+      - name: Run tests (each test limited to 2 minutes so a hang is reported instead of blocking)
+        shell: bash
+        run: node --test --test-timeout=120000 "test/*.test.js" 2>&1 | tee test-output.txt
+      - name: Summarize tests
+        if: always()
+        shell: bash
+        run: |
+          grep -E '^# (tests|pass|fail|cancelled|skipped)' test-output.txt | while read -r l; do echo "::notice title=tests::$l"; done
+          grep -E '^not ok' test-output.txt | head -20 | while read -r l; do echo "::error title=failing test::$l"; done
 
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
